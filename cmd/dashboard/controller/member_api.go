@@ -331,8 +331,15 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 				err = singleton.DB.Create(&s).Error
 			}
 		} else {
-			isEdit = true
-			err = singleton.DB.Save(&s).Error
+			if _, ok := singleton.ServerList[s.ID]; ok {
+				isEdit = true
+				err = singleton.DB.Save(&s).Error
+			} else {
+				s.Secret, err = utils.GenerateRandomString(18)
+				if err == nil {
+					err = singleton.DB.Create(&s).Error
+				}
+			}
 		}
 	}
 	if err != nil {
